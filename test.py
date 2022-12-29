@@ -150,20 +150,20 @@ def define_csv_final(fixture, statistics, events, lineups, team):
 
             return merge_dicts(players_map, substitutes_map)
 
-        lineups_final = {}
+        lineups_team_a = {}
+        lineups_team_b = {}
 
-        if lineups[0]['team']['id'] == team:
-            lineups_final['team_formation'] = lineups[0]['formation']
-            lineups_final['coach'] = lineups[0]['coach']['name']
-            players = get_players('team_', lineups[0]['startXI'], lineups[0]['substitutes'])
-            lineups_final = merge_dicts(lineups_final, players)
-        else:
-            lineups_final['adversary_formation'] = lineups[1]['formation']
-            lineups_final['coach'] = lineups[1]['coach']['name']
-            players = get_players('adversary_', lineups[1]['startXI'], lineups[1]['substitutes'])
-            lineups_final = merge_dicts(lineups_final, players)
+        lineups_team_a['team_formation'] = lineups[0]['formation']
+        lineups_team_a['coach'] = lineups[0]['coach']['name']
+        players_team_1 = get_players('team_', lineups[0]['startXI'], lineups[0]['substitutes'])
+        lineups_team_a = merge_dicts(lineups_team_a, players_team_1)
 
-        return lineups_final
+        lineups_team_b['adversary_formation'] = lineups[1]['formation']
+        lineups_team_b['coach'] = lineups[1]['coach']['name']
+        players_team_2 = get_players('adversary_', lineups[1]['startXI'], lineups[1]['substitutes'])
+        lineups_team_b = merge_dicts(lineups_team_b, players_team_2)
+
+        return merge_dicts(lineups_team_a, lineups_team_b)
 
     def define_fixture():
         play_where = get_team_details(team, fixture['teams'])['play']
@@ -180,6 +180,7 @@ def define_csv_final(fixture, statistics, events, lineups, team):
                 winner = 'loser'
         else:
             winner = 'winner'
+
         return {
             'team_id': team,
             'team_name': get_team_details(team, fixture['teams'])['name'],
@@ -218,7 +219,7 @@ def define_csv_final(fixture, statistics, events, lineups, team):
     lineups_map = define_lineups()
     result = merge_dicts(result, lineups_map)
 
-    with open('football.csv', 'w', encoding="utf-8") as f:
+    with open('liverpool_fixture_' + str(fixture['fixture']['id']) + '.csv', 'w', newline='', encoding='utf-8') as f:
         w = csv.DictWriter(f, result.keys())
         w.writeheader()
         w.writerow(result)
@@ -238,7 +239,5 @@ if __name__ == '__main__':
     events = get_events(fixture['response'][0]['fixture']['id'], team)
     lineups_team_1 = get_lineups(fixture['response'][0]['fixture']['id'], team)
     lineups_team_2 = get_lineups(fixture['response'][0]['fixture']['id'], get_adversary_details(team, fixture['response'][0]['teams'])['id'])
-    result = define_csv_final(fixture['response'][0], statistics['response'][0],
+    define_csv_final(fixture['response'][0], statistics['response'][0],
                      events['response'], [lineups_team_1['response'][0], lineups_team_2['response'][0]], team)
-
-    
